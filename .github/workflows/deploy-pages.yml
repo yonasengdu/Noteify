@@ -26,8 +26,11 @@ jobs:
       - name: Install dependencies
         run: npm ci --legacy-peer-deps
 
-      - name: Build with @cloudflare/next-on-pages
-        run: npx @cloudflare/next-on-pages
+      - name: Build
+        run: npx next build
+        env:
+          NEXT_PUBLIC_CONVEX_URL: ${{ secrets.NEXT_PUBLIC_CONVEX_URL }}
+          NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY }}
 
       - name: Deploy to Cloudflare Pages (Production)
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
@@ -35,7 +38,7 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: pages deploy .vercel/output/static --project-name=noteify
+          command: pages deploy out --project-name=noteify
 
       - name: Deploy to Cloudflare Pages (Preview)
         if: github.event_name == 'pull_request'
@@ -44,7 +47,7 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: pages deploy .vercel/output/static --project-name=noteify --branch=${{ github.head_ref }}
+          command: pages deploy out --project-name=noteify --branch=${{ github.head_ref }}
 
       - name: Comment preview URL on PR
         if: github.event_name == 'pull_request'
